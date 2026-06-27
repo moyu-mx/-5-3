@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  knighter-lab:
+    build: .
+    container_name: knighter-lab
+    volumes:
+      - ./results:/app/results
+      - ./config:/app/config
+    environment:
+      - PYTHONPATH=/app
+    command: ["--config", "config/config.yaml", "--full"]

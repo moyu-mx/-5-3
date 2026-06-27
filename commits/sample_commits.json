@@ -1,0 +1,42 @@
+[
+  {
+    "commit_id": "a1b2c3d4e5f6",
+    "bug_type": "NPD",
+    "message": "spi: mchp-pci1xxx: Fix a possible null pointer dereference in pci1xxx_spi_probe\n\nIn function pci1xxxx_spi_probe, there is a potential null pointer that may be caused by a failed memory allocation by the function devm_kzalloc. Hence, a null pointer check needs to be added to prevent null pointer dereferencing later in the code.",
+    "file": "drivers/spi/spi-pci1xxxx.c",
+    "patch": "--- a/drivers/spi/spi-pci1xxxx.c\n+++ b/drivers/spi/spi-pci1xxxx.c\n@@ -275,6 +275,8 @@ static int pci1xxxx_spi_probe\n \tspi_bus->spi_int[iter] = devm_kzalloc(&pdev->dev, sizeof(*spi_bus->spi_int[iter]), GFP_KERNEL);\n+\tif (!spi_bus->spi_int[iter])\n+\t\treturn -ENOMEM;\n \tspi_sub_ptr = spi_bus->spi_int[iter];",
+    "function_code": "static int pci1xxxx_spi_probe(struct pci_dev *pdev)\n{\n\tspi_bus->spi_int[iter] = devm_kzalloc(&pdev->dev, sizeof(*spi_bus->spi_int[iter]), GFP_KERNEL);\n\tspi_sub_ptr = spi_bus->spi_int[iter];\n\tspi_sub_ptr->spi_host = devm_spi_alloc_host(...);\n\treturn 0;\n}"
+  },
+  {
+    "commit_id": "b2c3d4e5f6a7",
+    "bug_type": "NPD",
+    "message": "ASoC: qcom: lpass: Fix null pointer dereference in platform probe\n\nAdd NULL check after devm_kzalloc for drvdata allocation.",
+    "file": "sound/soc/qcom/lpass-cpu.c",
+    "patch": "--- a/sound/soc/qcom/lpass-cpu.c\n+++ b/sound/soc/qcom/lpass-cpu.c\n@@ -120,6 +120,8 @@ int asoc_qcom_lpass_cpu_platform_probe(...)\n {\n \tdrvdata = devm_kzalloc(dev, sizeof(*drvdata), GFP_KERNEL);\n+\tif (!drvdata)\n+\t\treturn -ENOMEM;\n \tdrvdata->variant = variant;",
+    "function_code": "int asoc_qcom_lpass_cpu_platform_probe(struct platform_device *pdev)\n{\n\tdrvdata = devm_kzalloc(dev, sizeof(*drvdata), GFP_KERNEL);\n\tdrvdata->variant = variant;\n\treturn 0;\n}"
+  },
+  {
+    "commit_id": "c3d4e5f6a7b8",
+    "bug_type": "UBI",
+    "message": "ice: fix use-before-initialization in ice_set_fc\n\nEnsure pcaps is assigned before use on all paths.",
+    "file": "drivers/net/ethernet/intel/ice/ice_main.c",
+    "patch": "--- a/drivers/net/ethernet/intel/ice/ice_main.c\n+++ b/drivers/net/ethernet/intel/ice/ice_main.c\n@@ -500,6 +500,8 @@ int ice_set_fc(struct ice_port_info *pi, ...)\n {\n \tstruct ice_aqc_get_phy_caps_data *pcaps __free(kfree);\n+\tif (!pi || !aq_failures)\n+\t\treturn -EINVAL;\n \tpcaps = kzalloc(sizeof(*pcaps), GFP_KERNEL);",
+    "function_code": "int ice_set_fc(struct ice_port_info *pi, ...)\n{\n\tstruct ice_aqc_get_phy_caps_data *pcaps __free(kfree);\n\tif (!pi || !aq_failures)\n\t\treturn -EINVAL;\n\t...\n}"
+  },
+  {
+    "commit_id": "d4e5f6a7b8c9",
+    "bug_type": "Memory-Leak",
+    "message": "net: fix memory leak in device probe path\n\nAdd missing devm_kfree or error path cleanup.",
+    "file": "drivers/net/device.c",
+    "patch": "--- a/drivers/net/device.c\n+++ b/drivers/net/device.c\n@@ -88,6 +88,8 @@ static int net_device_probe(struct device *dev)\n \tdata = kzalloc(sizeof(*data), GFP_KERNEL);\n+\tif (!data)\n+\t\treturn -ENOMEM;\n \tdev_set_drvdata(dev, data);",
+    "function_code": "static int net_device_probe(struct device *dev)\n{\n\tdata = kzalloc(sizeof(*data), GFP_KERNEL);\n\tdev_set_drvdata(dev, data);\n\treturn 0;\n}"
+  },
+  {
+    "commit_id": "e5f6a7b8c9d0",
+    "bug_type": "Double-Free",
+    "message": "crypto: fix double free in error handling path",
+    "file": "drivers/crypto/crypto_dev.c",
+    "patch": "--- a/drivers/crypto/crypto_dev.c\n+++ b/drivers/crypto/crypto_dev.c\n@@ -200,7 +200,6 @@ static void crypto_cleanup(struct crypto_ctx *ctx)\n \tif (ctx->buf) {\n \t\tkfree(ctx->buf);\n-\t\tkfree(ctx->buf);\n \t\tctx->buf = NULL;\n \t}",
+    "function_code": "static void crypto_cleanup(struct crypto_ctx *ctx)\n{\n\tif (ctx->buf) {\n\t\tkfree(ctx->buf);\n\t\tctx->buf = NULL;\n\t}\n}"
+  }
+]

@@ -1,0 +1,69 @@
+bug_type: NPD
+checker_code: "// KNighter-synthesized checker for devm_kzalloc null dereference\n\
+  #include \"clang/StaticAnalyzer/Core/BugReporter/BugType.h\"\n#include \"clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h\"\
+  \n\nusing namespace clang;\nusing namespace ento;\n\nnamespace {\nclass devm_kzallocNullChecker\
+  \ : public Checker<check::PostStmt<CallExpr>,\n                                \
+  \          check::BranchCondition,\n                                          check::Location,\n\
+  \                                          check::Bind> {\n  mutable std::unique_ptr<BugType>\
+  \ BT;\n\npublic:\n  devm_kzallocNullChecker() : BT(new BugType(this, \"devm_kzalloc\
+  \ null dereference\", \"Null Dereference\")) {}\n\n  void checkPostCall(const CallEvent\
+  \ &Call, CheckerContext &C) const;\n  void checkBranchCondition(const Stmt *Cond,\
+  \ CheckerContext &C) const;\n  void checkLocation(SVal Loc, bool IsLoad, const Stmt\
+  \ *S, CheckerContext &C) const;\n  void checkBind(SVal Loc, SVal Val, const Stmt\
+  \ *S, CheckerContext &C) const;\n};\n}\n\nREGISTER_CHECKER(devm_kzallocNullChecker)"
+commit_id: b2c3d4e5f6a7
+created_at: '2026-06-26T15:14:33.025551'
+fp_rate: 0.5
+n_buggy: 2
+n_patched: 1
+output_dir: E:\软件质量保障\results\generated\b2c3d4e5f6a7
+pattern: '## Bug Pattern
+
+
+  The bug pattern is the failure to check the return value of `devm_kzalloc()` for
+  NULL before dereferencing it.
+
+
+  A potential null pointer may be caused by a failed memory allocation. The fix adds
+  a null check immediately after the allocation call.'
+plan: "```cpp\nSYNTAX_ERROR_DEMO;\n// KNighter-synthesized checker for devm_kzalloc\
+  \ null dereference\n#include \"clang/StaticAnalyzer/Core/BugReporter/BugType.h\"\
+  \n#include \"clang/StaticAnalyzer/Core/PathSensitive/CheckerContext.h\"\n\nusing\
+  \ namespace clang;\nusing namespace ento;\n\nnamespace {\nclass devm_kzallocNullChecker\
+  \ : public Checker<check::PostStmt<CallExpr>,\n                                \
+  \          check::BranchCondition,\n                                          check::Location,\n\
+  \                                          check::Bind> {\n  mutable std::unique_ptr<BugType>\
+  \ BT;\n\npublic:\n  devm_kzallocNullChecker() : BT(new BugType(this, \"devm_kzalloc\
+  \ null dereference\", \"Null Dereference\")) {}\n\n  void checkPostCall(const CallEvent\
+  \ &Call, CheckerContext &C) const;\n  void checkBranchCondition(const Stmt *Cond,\
+  \ CheckerContext &C) const;\n  void checkLocation(SVal Loc, bool IsLoad, const Stmt\
+  \ *S, CheckerContext &C) const;\n  void checkBind(SVal Loc, SVal Val, const Stmt\
+  \ *S, CheckerContext &C) const;\n};\n}\n\nREGISTER_CHECKER(devm_kzallocNullChecker)\n\
+  \n```"
+refine_attempts:
+- accepted: true
+  fp_count: 1
+  iteration: 1
+  notes: ''
+  total_reports: 2
+  tp_count: 1
+reports:
+- file: drivers/spi/spi-pci1xxxx.c
+  line: 11
+  message: 'Potential null dereference: unchecked kzalloc return value'
+  trace:
+  - kzalloc() called at drivers/spi/spi-pci1xxxx.c:10
+  - Dereference without null check at drivers/spi/spi-pci1xxxx.c:12
+  - 'Note: nearby branch contains unlikely(!ptr) check'
+  triage_label: ''
+  triage_reason: ''
+- file: kernel/sched/core.c
+  line: 21
+  message: 'Potential null dereference: unchecked devm_kzalloc return value'
+  trace:
+  - devm_kzalloc() called at kernel/sched/core.c:19
+  - Dereference without null check at kernel/sched/core.c:21
+  triage_label: ''
+  triage_reason: ''
+status: plausible
+total_reports: 2

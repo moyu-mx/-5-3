@@ -1,0 +1,37 @@
+# KNighter 课程实验配置（轻量化版本）
+project:
+  name: "KNighter-Lab"
+  version: "1.0.0"
+
+paths:
+  result_dir: "results"
+  checker_database: "checker_database"
+  prompt_template: "prompt_template"
+  mock_kernel: "data/mock_kernel"
+  commits_file: "commits/sample_commits.json"
+
+pipeline:
+  checker_nums: 3          # 生成 checker 数量上限（优化：2-5）
+  max_iterations: 3        # 合成最大迭代次数
+  max_repair_attempts: 5   # 语法修复最大尝试次数
+  refine_max_iterations: 3 # refine 最大迭代次数
+  refine_parallel_jobs: 4  # refine 并行线程数（优化项）
+  scan_modules:            # 轻量扫描指定模块（优化项）
+    - "kernel/sched"
+    - "drivers/spi"
+  plausible_threshold: 20  # 可接受报告数阈值
+  valid_threshold: 50      # 验证阶段 patched 报告阈值
+  triage_sample_size: 5    # triage 采样报告数
+
+llm:
+  provider: "fake"         # fake | openai
+  model: "gpt-4o-mini"
+  temperature: 0.2
+
+backend:
+  type: "mock"             # mock | csa（课程实验使用 mock）
+  scan_timeout: 300
+
+visualization:
+  output_dir: "results/visualization"
+  dpi: 150
